@@ -726,9 +726,13 @@
 }
 
 .kiwi-nicklist-info input {
-    background-color: #fff;
+    background-color: #201F1F;
     color: #000;
     font-weight: normal;
+}
+
+.kiwi-nicklist-info .fa.fa-search {
+    color: #fff;
 }
 
 .kiwi-nicklist-user {

@@ -6,6 +6,7 @@
 	"theme": "Default",
 	"themes": [
 		{ "name": "Default", "url": "static/themes/default" },
+        { "name": "Dark", "url": "static/themes/dark" },
         { "name": "Coffee", "url": "static/themes/coffee" },
 		{ "name": "GrayFox", "url": "static/themes/grayfox" },
 		{ "name": "Nightswatch", "url": "static/themes/nightswatch" },
