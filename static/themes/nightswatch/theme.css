@@ -357,9 +357,8 @@
 
 /* Control Input - displayed at bottom of Kiwi ( ControlInput.vue ) */
 .kiwi-controlinput {
-    background: #efefef;
-    border-top: 1px solid #e8e8e8;
-    color: #272727;
+    background-color: #3c3c3c;
+    color: #fff;
 }
 .kiwi-controlinput .kiwi-controlinput-user,
 .kiwi-controlinput-inner .kiwi-controlinput-user {
@@ -593,9 +592,27 @@
     border-top: 1px solid rgba(0, 0, 0, 0.2);
 }
 .kiwi-nicklist-info input {
-    background-color: #adadad;
-    color: #000;
+    background-color: #3c3c3c;
+    color: #fff;
 }
+
+.kiwi-nicklist-info input::-webkit-input-placeholder {
+    color: #fff;
+}
+.kiwi-nicklist-info input::-moz-placeholder {
+    color: #fff;
+}
+.kiwi-nicklist-info input:-ms-input-placeholder {
+    color: #fff;
+}
+.kiwi-nicklist-info input:-moz-placeholder {
+    color: #fff;
+}
+
+.kiwi-nicklist-info .fa.fa-search {
+    color: #fff;
+}
+
 .kiwi-nicklist-user {
     border-top: 1px solid #858585;
 }
