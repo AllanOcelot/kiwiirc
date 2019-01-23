@@ -387,6 +387,10 @@ msgstr "Nobody is banned!"
 
 #: ChannelInfo $t('channel_')
 
+#: Only OPs can edit these settings
+msgid "channel_settings_disabled"
+msgstr "Only OPs can edit these settings"
+
 #: Topic
 msgid "channel_topic"
 msgstr "Topic"

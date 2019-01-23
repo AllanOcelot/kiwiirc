@@ -3,6 +3,10 @@
         <form :class="{ 'kiwi-channelinfo-disabled': !areWeAnOp() }"
               class="u-form kiwi-channelinfo-basicmodes" @submit.prevent="">
 
+            <span :if="!areWeAnOp()" class="kiwi-channelinfo-disabled-alert">
+                {{ $t('channel_settings_disabled') }}
+            </span>
+
             <label class="kiwi-channelinfo-topic">
                 <span>{{ $t('channel_topic') }}</span>
                 <textarea v-model.lazy="topic" :disabled="!areWeAnOp()" rows="2"/>
@@ -124,7 +128,16 @@ export default {
         margin-bottom: 2.5em;
     }
 
-    .kiwi-channelinfo-disabled {
-        opacity: 0.5;
+    .kiwi-channelinfo-disabled-alert {
+        width: 100%;
+        padding: 10px 5px;
+        cursor: default;
+        text-align: center;
+        margin: 5px 0;
+        display: inline-block;
+        box-sizing: border-box;
+        font-size: 1.2em;
+        background-color: #d16c6c;
+        color: #fff;
     }
 </style>
