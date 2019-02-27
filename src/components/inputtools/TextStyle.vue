@@ -73,23 +73,31 @@ export default {
     height: 30px;
 }
 
+.kiwi-inputtool-colours-palette {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 5px 10px;
+}
+
 .kiwi-inputtools-colours-colour {
-    display: block;
-    float: left;
-    height: 30px;
-    width: 30px;
+    display: inline-block;
+    height: 22px;
+    width: 22px;
+    border-radius: 50%;
     cursor: pointer;
     box-sizing: border-box;
     border: 1px solid gray;
-    margin: 0;
+    margin: 0 2px;
 }
 
 .kiwi-inputtools-colours-reset {
-    font-size: 23px;
-    line-height: 30px;
     text-align: center;
     background: #000;
     color: #cacaca;
+    font-size: 1em;
+    line-height: 20px;
 }
 
 </style>

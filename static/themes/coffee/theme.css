@@ -341,13 +341,6 @@
 .kiwi-controlinput-send {
     background: #f1f1f1;
 }
-.kiwi-controlinput-tools {
-    background: #f1f1f1;
-}
-.kiwi-controlinput-active-tool {
-    background: #f6f6f6;
-}
-
 .kiwi-selfuser,
 .kiwi-inputtool-emoji-emoji {
     background-color: #efefef;

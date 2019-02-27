@@ -342,12 +342,17 @@
 .kiwi-controlinput-send {
     background: #f1f1f1;
 }
-.kiwi-controlinput-tools {
-    background: #f1f1f1;
-}
 .kiwi-controlinput-active-tool {
     background: #f6f6f6;
 }
+
+.kiwi-inputtool-colours-palette,
+.kiwi-inputtool-emoji-palette {
+    background: #f1f1f1;
+    border-top-color: #e1e1e1;
+}
+
+
 /* AutoComplete - If the user has enabled autocomplete in their options, this will style the options (AutoComplete.vue) */
 .kiwi-autocomplete {
     box-shadow: 0 1px 15px rgba(64, 54, 63, 0.25);

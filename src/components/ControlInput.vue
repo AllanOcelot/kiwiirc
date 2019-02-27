@@ -60,13 +60,6 @@
             </form>
 
             <div ref="plugins" class="kiwi-controlinput-tools">
-                <div
-                    :class="{'kiwi-controlinput-tools-container-expand--inverse': !showPlugins}"
-                    class="kiwi-controlinput-tools-container-expand"
-                    @click="showPlugins=!showPlugins"
-                >
-                    <i class="fa fa-bars" aria-hidden="true" />
-                </div>
                 <transition name="kiwi-plugin-ui-trans">
                     <div v-if="showPlugins" class="kiwi-controlinput-tools-container">
                         <a class="kiwi-controlinput-tool" @click.prevent="onToolClickTextStyle">
@@ -92,11 +85,21 @@
                         />
                     </div>
                 </transition>
+                <div
+                    :class="{'kiwi-controlinput-tools-container-expand--inverse': !showPlugins}"
+                    class="kiwi-controlinput-tools-container-expand"
+                    @click="showPlugins=!showPlugins"
+                >
+                    <i v-if="!showPlugins" class="fa fa-bars" aria-hidden="true" />
+                    <i v-else class="fa fa-times" aria-hidden="true" />
+                </div>
             </div>
         </div>
 
         <div class="kiwi-controlinput-active-tool">
-            <component :is="active_tool" v-bind="active_tool_props"/>
+            <transition name="kiwi-inputtool-emoji-trans">
+                <component :is="active_tool" v-bind="active_tool_props"/>
+            </transition>
         </div>
     </div>
 </template>
@@ -141,7 +144,7 @@ export default {
             active_tool: null,
             active_tool_props: {},
             pluginUiElements: GlobalApi.singleton().controlInputPlugins,
-            showPlugins: true,
+            showPlugins: false,
             current_input_value: '',
         };
     },
@@ -555,7 +558,6 @@ export default {
 }
 
 .kiwi-controlinput-inner i {
-    font-size: 120%;
     margin-left: 8px;
     margin-right: 2px;
 }
@@ -585,11 +587,10 @@ export default {
 }
 
 .kiwi-controlinput-tools {
-    /* 38px = 40px controlinput height - margin top+botton */
-    line-height: 38px;
-    margin: 2px 0 2px 10px;
-    border-radius: 7px 0 0 7px;
+    line-height: 43px;
+    margin: 0 0 0 10px;
     cursor: pointer;
+    border-left: 1px solid grey;
 }
 
 .kiwi-controlinput-form {
@@ -635,7 +636,11 @@ export default {
 
 .kiwi-controlinput-tool {
     display: inline-block;
-    padding: 0 1em;
+    padding: 0 8px;
+}
+
+.kiwi-controlinput-tool i {
+    margin: 0;
 }
 
 .kiwi-controlinput-tool a {
@@ -691,22 +696,27 @@ export default {
     }
 }
 
+.kiwi-controlinput-tools-container {
+    position: relative;
+    display: inline-block;
+    padding-left: 5px;
+}
+
 .kiwi-controlinput-tools-container-expand {
     display: inline-block;
-    padding: 0 1em;
+    padding: 0 10px;
+    position: relative;
+    z-index: 1;
+    background: #fff;
 }
 
 .kiwi-controlinput-tools-container-expand i {
+    margin: 0;
     transition: transform 0.2s;
 }
 
 .kiwi-controlinput-tools-container-expand--inverse i {
     transform: rotateZ(180deg);
-}
-
-.kiwi-controlinput-tools-container {
-    position: relative;
-    display: inline-block;
 }
 
 .kiwi-plugin-ui-trans-enter,
@@ -722,6 +732,29 @@ export default {
 .kiwi-plugin-ui-trans-enter-active,
 .kiwi-plugin-ui-trans-leave-active {
     transition: right 0.2s;
+}
+
+.kiwi-inputtool-emoji-trans {
+    transition: all 0.2s;
+}
+
+.kiwi-inputtool-emoji-trans-enter,
+.kiwi-inputtool-emoji-trans-leave-to {
+    opacity: 0;
+    bottom: 0;
+    height: 0;
+}
+
+.kiwi-inputtool-emoji-trans-enter-to,
+.kiwi-inputtool-emoji-trans-leave {
+    opacity: 1;
+    bottom: 100%;
+    height: auto;
+}
+
+.kiwi-inputtool-emoji-trans-enter-active,
+.kiwi-inputtool-emoji-trans-leave-active {
+    transition: all 0.3s, opacity 0.5s;
 }
 
 @media screen and (max-width: 769px) {

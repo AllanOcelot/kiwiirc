@@ -52,15 +52,43 @@ export default {
 
 <style>
 
+.kiwi-controlinput-active-tool {
+    overflow: hidden;
+    border-radius: 10px 10px 0 0;
+}
+
+.kiwi-inputtool-emoji-palette {
+    display: flex;
+    justify-content: space-evenly;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 5px 10px;
+    border-top: 1px solid;
+}
+
 .kiwi-inputtool-emoji-emoji {
-    display: block;
-    float: left;
+    display: flex;
     height: 30px;
     width: 30px;
     cursor: pointer;
     box-sizing: border-box;
     margin: 2px;
     background-size: contain;
+    transform: rotate(0deg);
+    transition: transform 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.kiwi-inputtool-emoji-emoji:hover {
+    animation-name: rotateEmoji;
+    animation-duration: 0.5s;
+}
+
+@keyframes rotateEmoji {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+    100% { transform: rotate(0deg); }
 }
 
 </style>
