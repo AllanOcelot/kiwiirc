@@ -33,7 +33,7 @@
         ]"
         :data-message-id="message.id"
         :data-nick="(message.nick||'').toLowerCase()"
-        class="kiwi-messagelist-message kiwi-messagelist-message--compact"
+        class="kiwi-messagelist-message kiwi-messagelist-message--compact kiwi-aligntime-left"
         @click="ml.onMessageClick($event, message)"
     >
         <div
@@ -172,7 +172,8 @@ export default {
 //Channel traffic messages
 .kiwi-messagelist-message--compact.kiwi-messagelist-message-traffic {
     margin: 0;
-    padding: 1px 0;
+    padding: 0 10px;
+    border-left: 3px solid transparent;
 }
 
 .kiwi-messagelist-message--compact.kiwi-messagelist-message-traffic .kiwi-messagelist-body {
@@ -196,7 +197,6 @@ export default {
 //Channel topic
 .kiwi-messagelist-message--compact.kiwi-messagelist-message-topic {
     border-radius: 0;
-    border-left: 0;
     border-right: 0;
     margin: 5px 0;
 }
@@ -219,6 +219,35 @@ export default {
 // messages are opacity: 1, rather than just specifying one.
 .kiwi-messagelist-message--compact.kiwi-messagelist-message--unread {
     opacity: 1;
+}
+
+.kiwi-messagelist-message-mode,
+.kiwi-messagelist-message-traffic,
+.kiwi-messagelist-message-nick {
+    margin: 0;
+}
+
+/* Time aligned left */
+.kiwi-messagelist-message--compact.kiwi-aligntime-left .kiwi-messagelist-time {
+    float: none;
+    position: absolute;
+    top: 1px;
+    right: auto;
+    left: 8px;
+}
+
+.kiwi-messagelist-message--compact.kiwi-aligntime-left .kiwi-messagelist-nick {
+    left: 55px;
+    text-align: left;
+}
+
+.kiwi-messagelist-message--compact.kiwi-aligntime-left .kiwi-messagelist-nick .kiwi-awaystatusindicator {
+    margin-right: 0;
+}
+
+.kiwi-messagelist-message--compact.kiwi-aligntime-left .kiwi-messagelist-body {
+    padding-left: 165px;
+    margin: 0;
 }
 
 @media screen and (max-width: 700px) {
