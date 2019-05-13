@@ -416,6 +416,7 @@ export default {
     user-select: none;
     box-sizing: border-box;
 
+    .kiwi-userbox-plugin-actions a,
     .kiwi-userbox-action {
         display: inline-block;
         border: 1px solid;
@@ -446,7 +447,7 @@ export default {
 
 .kiwi-userbox-plugin-action {
     white-space: nowrap;
-    box-sizing: borderbox;
+    box-sizing: border-box;
     max-width: 80%;
     margin: 4px 2px;
 }

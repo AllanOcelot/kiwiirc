@@ -320,7 +320,8 @@
     color: var(--brand-default-fg);
 }
 
-.kiwi-userbox .kiwi-userbox-actions .kiwi-userbox-action:hover {
+.kiwi-userbox .kiwi-userbox-actions .kiwi-userbox-action:hover,
+.kiwi-userbox-plugin-actions a:hover {
     background-color: var(--brand-default-fg);
     color: var(--brand-default-bg);
 }
