@@ -446,6 +446,8 @@ export default {
 
 .kiwi-userbox-plugin-action {
     white-space: nowrap;
+    box-sizing: borderbox;
+    max-width: 80%;
     margin: 4px 2px;
 }
 
