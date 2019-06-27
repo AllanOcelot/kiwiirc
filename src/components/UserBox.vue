@@ -416,6 +416,7 @@ export default {
     user-select: none;
     box-sizing: border-box;
 
+    // We target the plugin generated content, rather than only the specific class name.
     .kiwi-userbox-plugin-actions a,
     .kiwi-userbox-action {
         display: inline-block;
