@@ -3,7 +3,7 @@
         <form class="u-form kiwi-channelinfo-basicmodes" @submit.prevent="">
             <label class="kiwi-channelinfo-topic">
                 <span>{{ $t('channel_topic') }}</span>
-                <textarea v-model.lazy="topic" rows="2"/>
+                <textarea v-model.lazy="topic" rows="2" />
             </label>
 
             <div v-if="buffer.topics.length > 1" class="kiwi-channelinfo-previoustopics">
@@ -12,31 +12,31 @@
                     <i :class="'fa fa-caret-' + (showPrevTopics ? 'up' : 'down')" />
                 </a>
                 <ul v-if="showPrevTopics">
-                    <li v-for="(topic, idx) in buffer.topics" :key="idx">
-                        <span>{{ topic }}</span>
+                    <li v-for="(topicText, idx) in prevTopics" :key="idx">
+                        <span>{{ topicText.trim() }}</span>
                     </li>
                 </ul>
             </div>
 
             <label class="u-checkbox-wrapper">
                 <span>{{ $t('channel_moderated') }}</span>
-                <input v-model="modeM" type="checkbox" >
+                <input v-model="modeM" type="checkbox">
             </label>
             <label class="u-checkbox-wrapper">
                 <span>{{ $t('channel_invite') }}</span>
-                <input v-model="modeI" type="checkbox" >
+                <input v-model="modeI" type="checkbox">
             </label>
             <label class="u-checkbox-wrapper">
                 <span>{{ $t('channel_moderated_topic') }}</span>
-                <input v-model="modeT" type="checkbox" >
+                <input v-model="modeT" type="checkbox">
             </label>
             <label class="u-checkbox-wrapper">
                 <span>{{ $t('channel_external') }}</span>
-                <input v-model="modeN" type="checkbox" >
+                <input v-model="modeN" type="checkbox">
             </label>
             <label>
                 <span>{{ $t('password') }}</span>
-                <input v-model.lazy="modeK" type="text" class="u-input" >
+                <input v-model.lazy="modeK" type="text" class="u-input">
             </label>
         </form>
     </div>
@@ -72,7 +72,7 @@ function generateComputedModeWithParam(mode) {
             if (newVal) {
                 this.setMode('+' + mode, newVal);
             } else {
-                this.setMode('-' + mode);
+                this.setMode('-' + mode, this.modeVal(mode));
             }
         },
     };
@@ -97,8 +97,18 @@ export default {
             },
             set: function computedTopicSet(newVal) {
                 let newTopic = newVal.replace('\n', ' ');
-                this.buffer.getNetwork().ircClient.setTopic(this.buffer.name, newTopic);
+                // TODO: Update irc-framework to insert a trailing : if the last argument is an
+                //       empty string. The trailing : makes a difference between things like
+                //       requesting a topic and changing to an empty topic
+                if (!newTopic.trim()) {
+                    this.buffer.getNetwork().ircClient.raw(`TOPIC ${this.buffer.name} :`);
+                } else {
+                    this.buffer.getNetwork().ircClient.setTopic(this.buffer.name, newTopic);
+                }
             },
+        },
+        prevTopics() {
+            return this.buffer.topics.filter((topic) => topic.trim());
         },
     },
     methods: {

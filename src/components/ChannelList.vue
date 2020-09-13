@@ -2,23 +2,24 @@
     <div :class="{'kiwi-channellist-padding-top': !list.length}" class="kiwi-channellist">
         <div class="kiwi-channellist-content-container">
             <div class="kiwi-channellist-nav">
-                <form class="u-form kiwi-channellist-search" @submit.prevent>
-                    <input v-model="search" :placeholder="$t('do_search')" class="u-input" >
+                <form class="u-form u-form--big kiwi-channellist-search" @submit.prevent>
+                    <input v-model="search" :placeholder="$t('do_search')" class="u-input">
                     <a
                         :class="{
                             'u-button-primary': !isLoading,
                             'u-button-secondary': isLoading,
                         }"
                         class="u-button kiwi-channellist-refresh"
-                        @click="maybeUpdateList">
-                        <i v-if="!isLoading" class="fa fa-refresh" aria-hidden="true"/>
-                        <i v-else class="fa fa-refresh fa-spin" aria-hidden="true"/>
+                        @click="maybeUpdateList"
+                    >
+                        <i v-if="!isLoading" class="fa fa-refresh" aria-hidden="true" />
+                        <i v-else class="fa fa-refresh fa-spin" aria-hidden="true" />
                     </a>
                 </form>
                 <div v-if="list.length" class="kiwi-channellist-pagination">
-                    <a @click="prevPage"><i class="fa fa-step-backward" aria-hidden="true"/></a>
+                    <a @click="prevPage"><i class="fa fa-step-backward" aria-hidden="true" /></a>
                     {{ page + 1 }} / {{ maxPages + 1 }}
-                    <a @click="nextPage"><i class="fa fa-step-forward" aria-hidden="true"/></a>
+                    <a @click="nextPage"><i class="fa fa-step-forward" aria-hidden="true" /></a>
                 </div>
             </div>
             <div class="kiwi-channellist-table">
@@ -27,7 +28,7 @@
                         <tr v-for="channel in paginated" :key="channel.channel">
                             <td class="kiwi-channellist-user-center">
                                 <span v-if="channel.num_users >= 0" class="kiwi-channellist-users">
-                                    <i class="fa fa-user" aria-hidden="true"/>
+                                    <i class="fa fa-user" aria-hidden="true" />
                                     {{ channel.num_users }}
                                 </span>
                             </td>
@@ -37,7 +38,7 @@
                                 </a>
                             </td>
                             <td class="kiwi-channellist-table-topic">
-                                <div v-html="formatAndTrimTopic(channel.topic)"/>
+                                <div v-html="formatAndTrimTopic(channel.topic)" />
                             </td>
                             <td class="kiwi-channellist-user-center">
                                 <a
@@ -63,8 +64,8 @@
 'kiwi public';
 
 import _ from 'lodash';
-import * as TextFormatting from '@/helpers/TextFormatting';
-import formatIrcMessage from '@/libs/MessageFormatter';
+import toHtml from '@/libs/renderers/Html';
+import parseMessage from '@/libs/MessageParser';
 
 export default {
     props: ['network'],
@@ -155,12 +156,11 @@ export default {
         },
         formatAndTrimTopic(rawTopic) {
             let showModes = this.$state.setting('showChanlistModes');
-            let showEmoticons = this.$state.setting('buffers.show_emoticons');
 
             let topic = showModes ? rawTopic : rawTopic.replace(/^\[([^\]]+)\] ?/, '');
-            let blocks = formatIrcMessage(topic, { extras: false });
-            let content = TextFormatting.styleBlocksToHtml(blocks, showEmoticons, null);
-            return content.html;
+            let blocks = parseMessage(topic, { extras: false });
+            let content = toHtml(blocks);
+            return content;
         },
         joinChannel(channelName) {
             this.$state.addBuffer(this.network.id, channelName);
@@ -194,25 +194,23 @@ export default {
 
 /* Input form styling */
 .kiwi-channellist-nav .u-form {
-    padding-right: 46px;
-    position: relative;
+    display: flex;
+    justify-content: center;
 }
 
 .kiwi-channellist-nav .u-form .u-input {
     width: 324px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .kiwi-channellist-nav .u-form .u-button-primary,
 .kiwi-channellist-nav .u-form .u-button-secondary {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 24px;
-    width: 12px;
-    text-align: center;
-    line-height: 26px;
     font-size: 1.3em;
-    border-radius: 0;
+    border-radius: 0 5px 5px 0;
+    border: none;
+    display: flex;
+    align-items: center;
 }
 
 .kiwi-channellist-nav .u-form .u-button-primary i,
@@ -222,7 +220,7 @@ export default {
 
 .kiwi-channellist-pagination {
     display: inline-block;
-    margin: 0 2em;
+    margin: 20px auto 10px auto;
     font-size: 1.2em;
 }
 

@@ -13,17 +13,18 @@
         <link :href="themeUrl" rel="stylesheet" type="text/css">
 
         <template v-if="!hasStarted || (!fallbackComponent && networks.length === 0)">
-            <component :is="startupComponent" @start="startUp"/>
+            <component :is="startupComponent" @start="startUp" />
         </template>
         <template v-else>
-            <state-browser :networks="networks" :sidebar-state="sidebarState"/>
+            <state-browser :networks="networks" :sidebar-state="sidebarState" />
             <div
                 :class="{
                     'kiwi-workspace--disconnected': network && network.state !== 'connected'
                 }"
                 class="kiwi-workspace"
-                @click="stateBrowserDrawOpen = false">
-                <div class="kiwi-workspace-background"/>
+                @click="stateBrowserDrawOpen = false"
+            >
+                <div class="kiwi-workspace-background" />
 
                 <template v-if="!activeComponent && network">
                     <container
@@ -31,22 +32,29 @@
                         :buffer="buffer"
                         :sidebar-state="sidebarState"
                     >
-                        <template v-slot:before v-if="mediaviewerOpen">
+                        <template v-if="mediaviewerOpen" v-slot:before>
                             <media-viewer
                                 :url="mediaviewerUrl"
                                 :component="mediaviewerComponent"
+                                :component-props="mediaviewerComponentProps"
                                 :is-iframe="mediaviewerIframe"
+                                class="kiwi-main-mediaviewer"
+                                @close="$state.$emit('mediaviewer.hide', { source: 'user' });"
                             />
                         </template>
                     </container>
-                    <control-input v-if="buffer.show_input" :container="networks" :buffer="buffer"/>
+                    <control-input
+                        v-if="buffer.show_input"
+                        :container="networks"
+                        :buffer="buffer"
+                    />
                 </template>
                 <component
-                    v-else-if="!activeComponent"
                     :is="fallbackComponent"
+                    v-else-if="!activeComponent"
                     v-bind="fallbackComponentProps"
                 />
-                <component v-else :is="activeComponent" v-bind="activeComponentProps"/>
+                <component :is="activeComponent" v-else v-bind="activeComponentProps" />
             </div>
         </template>
     </div>
@@ -55,7 +63,7 @@
 <script>
 'kiwi public';
 
-import 'font-awesome-webpack';
+import 'font-awesome-webpack-4';
 import cssVarsPonyfill from 'css-vars-ponyfill';
 import '@/res/globalStyle.css';
 import Tinycon from 'tinycon';
@@ -101,6 +109,7 @@ export default {
             mediaviewerOpen: false,
             mediaviewerUrl: '',
             mediaviewerComponent: null,
+            mediaviewerComponentProps: {},
             mediaviewerIframe: false,
             themeUrl: '',
             sidebarState: new SidebarState(),
@@ -124,10 +133,10 @@ export default {
         this.initMediaviewer();
         this.configureFavicon();
 
-        document.addEventListener('keydown', event => this.onKeyDown(event), false);
-        window.addEventListener('focus', event => this.onFocus(event), false);
-        window.addEventListener('blur', event => this.onBlur(event), false);
-        window.addEventListener('touchstart', event => this.onTouchStart(event));
+        this.listen(document, 'keydown', (event) => this.onKeyDown(event));
+        this.listen(window, 'focus', (event) => this.onFocus(event));
+        this.listen(window, 'blur', (event) => this.onBlur(event));
+        this.listen(window, 'touchstart', (event) => this.onTouchStart(event));
     },
     mounted() {
         // Decide which startup screen to use depending on the config
@@ -164,8 +173,19 @@ export default {
             // Make sure a startup screen can't trigger these more than once
             if (!this.hasStarted) {
                 this.warnOnPageClose();
-                Notifications.requestPermission();
-                Notifications.listenForNewMessages(this.$state);
+
+                // Wait for a click or sending a message before asking for notification permission.
+                // Not doing this on an input event will get it blocked by some browsers.
+                let requestNotificationPermission = () => {
+                    this.$state.$off('document.clicked', requestNotificationPermission);
+                    this.$state.$off('input.raw', requestNotificationPermission);
+
+                    Notifications.requestPermission(this.$state);
+                    Notifications.listenForNewMessages(this.$state);
+                };
+
+                this.$state.$once('document.clicked', requestNotificationPermission);
+                this.$state.$once('input.raw', requestNotificationPermission);
             }
 
             this.hasStarted = true;
@@ -220,6 +240,7 @@ export default {
 
                 this.mediaviewerUrl = opts.url;
                 this.mediaviewerComponent = opts.component;
+                this.mediaviewerComponentProps = opts.componentProps;
                 this.mediaviewerIframe = opts.iframe;
                 this.mediaviewerOpen = true;
             });
@@ -246,7 +267,8 @@ export default {
                 }
             });
 
-            this.listen(this.$state, 'message.new', (message) => {
+            this.listen(this.$state, 'message.new', (event) => {
+                let message = event.message;
                 if (!message.isHighlight || message.ignore || this.$state.ui.app_has_focus) {
                     return;
                 }
@@ -261,7 +283,7 @@ export default {
                 this.$state.ui.app_height = this.$el.clientHeight;
                 this.$state.ui.is_narrow = this.$el.clientWidth <= 769;
             };
-            window.addEventListener('resize', trackWindowDims);
+            this.listen(window, 'resize', trackWindowDims);
             trackWindowDims();
         },
         warnOnPageClose() {
@@ -269,8 +291,14 @@ export default {
                 if (this.$state.setting('warnOnExit')) {
                     return this.$t('window_unload');
                 }
-
                 return undefined;
+            };
+            window.onunload = () => {
+                this.$state.networks.forEach((net) => {
+                    if (net.connection.direct && net.state === 'connected') {
+                        net.ircClient.raw('QUIT', this.$state.setting('quitMessage') || 'Client Closed Connection');
+                    }
+                });
             };
         },
         emitBufferPaste(event) {
@@ -427,10 +455,10 @@ body {
     position: absolute;
     top: 0;
     left: 0;
-    width: 200px;
+    width: 220px;
     bottom: 0;
+    z-index: 11; /* Must be at least 1 higher than the workspace :after z-index; */
     transition: left 0.145s, margin-left 0.145s;
-    z-index: 1;
 }
 
 .kiwi-container {
@@ -442,9 +470,14 @@ body {
     height: 5%;
 }
 
-.kiwi-mediaviewer {
+.kiwi-main-mediaviewer {
     max-height: 70%;
     overflow: auto;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.kiwi-main-mediaviewer .embedly-card {
+    display: block;
 }
 
 .kiwi-controlinput {
@@ -459,7 +492,7 @@ body {
     }
 
     .kiwi-statebrowser {
-        left: -200px;
+        left: -220px;
     }
 
     .kiwi-wrap--statebrowser-drawopen .kiwi-statebrowser {

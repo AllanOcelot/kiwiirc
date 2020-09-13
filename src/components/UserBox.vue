@@ -1,11 +1,11 @@
 <template>
     <div class="kiwi-userbox">
         <span v-if="isSelf" class="kiwi-userbox-selfprofile">
-            This is you!
+            {{ $t('user_you') }}
         </span>
         <div class="kiwi-userbox-header">
             <h3>
-                <away-status-indicator :network="network" :user="user"/> {{ user.nick }}
+                <away-status-indicator :network="network" :user="user" /> {{ user.nick }}
                 <span v-if="userMode" class="kiwi-userbox-modestring">+{{ userMode }}</span>
             </h3>
             <div class="kiwi-userbox-usermask">{{ user.username }}@{{ user.host }}</div>
@@ -13,23 +13,23 @@
 
         <div class="kiwi-userbox-basicinfo">
             <span class="kiwi-userbox-basicinfo-title">{{ $t('whois_realname') }}:</span>
-            <span class="kiwi-userbox-basicinfo-data">{{ user.realname }} </span>
+            <span class="kiwi-userbox-basicinfo-data" v-html="formattedRealname" />
         </div>
 
         <p class="kiwi-userbox-actions">
-            <a v-if="!isSelf" class="kiwi-userbox-action" @click="openQuery">
-                <i class="fa fa-comment-o" aria-hidden="true"/>
+            <a v-if="!isSelf && !buffer.isQuery()" class="kiwi-userbox-action" @click="openQuery">
+                <i class="fa fa-comment-o" aria-hidden="true" />
                 {{ $t('send_a_message') }}
             </a>
             <a v-if="!whoisRequested" class="kiwi-userbox-action" @click="updateWhoisData">
-                <i class="fa fa-question-circle" aria-hidden="true"/>
+                <i class="fa fa-question-circle" aria-hidden="true" />
                 {{ $t('more_information') }}
             </a>
         </p>
 
         <form v-if="!isSelf" class="u-form kiwi-userbox-ignoreuser">
             <label>
-                <input v-model="user.ignore" type="checkbox" >
+                <input v-model="user.ignore" type="checkbox">
                 <span> {{ $t('ignore_user') }} </span>
             </label>
         </form>
@@ -40,7 +40,7 @@
             class="kiwi-userbox-whois"
         >
             <template v-if="whoisLoading">
-                <i class="fa fa-spinner" aria-hidden="true"/>
+                <i class="fa fa-spinner" aria-hidden="true" />
             </template>
             <template v-else>
                 <span class="kiwi-userbox-whois-line">
@@ -100,7 +100,7 @@
                                kiwi-userbox-opaction-kick kiwi-userbox-opaction"
                         @click="kickUser"
                     >
-                        <i class="fa fa-sign-out" aria-hidden="true"/>
+                        <i class="fa fa-sign-out" aria-hidden="true" />
                         {{ $t('user_kick') }}
                     </button>
                 </label>
@@ -110,7 +110,7 @@
                                kiwi-userbox-opaction-ban kiwi-userbox-opaction"
                         @click="banUser"
                     >
-                        <i class="fa fa-ban" aria-hidden="true"/>
+                        <i class="fa fa-ban" aria-hidden="true" />
                         {{ $t('user_ban') }}
                     </button>
                 </label>
@@ -120,7 +120,7 @@
                                kiwi-userbox-opaction-kickban kiwi-userbox-opaction"
                         @click="kickbanUser"
                     >
-                        <i class="fa fa-exclamation-triangle" aria-hidden="true"/>
+                        <i class="fa fa-exclamation-triangle" aria-hidden="true" />
                         {{ $t('user_kickban') }}
                     </button>
                 </label>
@@ -133,7 +133,11 @@
 
 'kiwi public';
 
+import * as ipRegex from 'ip-regex';
 import * as TextFormatting from '@/helpers/TextFormatting';
+import * as IrcdDiffs from '@/helpers/IrcdDiffs';
+import toHtml from '@/libs/renderers/Html';
+import parseMessage from '@/libs/MessageParser';
 import AwayStatusIndicator from './AwayStatusIndicator';
 
 export default {
@@ -152,7 +156,6 @@ export default {
         availableChannelModes: function availableChannelModes() {
             let availableModes = [];
             let prefixes = this.network.ircClient.network.options.PREFIX;
-            // TODO: Double check these modes mean the correct things
             let knownPrefix = {
                 q: 'Owner',
                 a: 'Admin',
@@ -160,6 +163,17 @@ export default {
                 h: 'Half-Operator',
                 v: 'Voice',
             };
+
+            if (!IrcdDiffs.isAChannelModeAdmin(this.network)) {
+                delete knownPrefix.a;
+            }
+            if (!IrcdDiffs.isQChannelModeOwner(this.network)) {
+                delete knownPrefix.q;
+            }
+            if (!IrcdDiffs.supportsHalfOp(this.network)) {
+                delete knownPrefix.h;
+            }
+
             prefixes.forEach((prefix) => {
                 let mode = prefix.mode;
                 if (knownPrefix[mode]) {
@@ -178,6 +192,11 @@ export default {
             }
 
             return this.buffer.isUserAnOp(this.buffer.getNetwork().nick);
+        },
+        formattedRealname() {
+            let blocks = parseMessage(this.user.realname || '', { extras: false });
+            let content = toHtml(blocks, false);
+            return content;
         },
         isUserOnBuffer: function isUserOnBuffer() {
             if (!this.buffer) {
@@ -285,7 +304,41 @@ export default {
             let reason = this.$state.setting('buffers.default_kick_reason');
             this.network.ircClient.raw('KICK', this.buffer.name, this.user.nick, reason);
         },
-        createBanMask: function banMask() {
+        createBanMask: function createBanMask() {
+            // try to ban via user account first
+            if (this.user.account) {
+                // if EXTBAN is supported use that
+                let extban = IrcdDiffs.extbanAccount(this.network);
+                if (extban) {
+                    return extban + ':' + this.user.account;
+                }
+
+                // if the account name is in the host ban the host
+                // Eg. user@network/user/accountname
+                if (this.user.host.toLowerCase().indexOf(this.user.account.toLowerCase()) > -1) {
+                    return '*!*@' + this.user.host;
+                }
+            }
+
+            // if an ip address is in the host and not the whole host ban the ip
+            // Eg. user@gateway/1.2.3.4
+            let ipTest = new RegExp('(' + ipRegex.v4().source + '|' + ipRegex.v6().source + ')');
+            if (ipTest.test(this.user.host)) {
+                let match = this.user.host.match(ipTest)[0];
+                if (match !== this.user.host) {
+                    return '*!*@*' + match + '*';
+                }
+            }
+
+            // if an 8 char hex is the username ban by username. Commonly used in gateways
+            // Eg. 59d4c432@a.clients.kiwiirc.com
+            let hexTest = /^([a-f0-9]{8})$/i;
+            if (hexTest.test(this.user.username)) {
+                let match = this.user.username.match(hexTest)[0];
+                return '*!' + match + '@*';
+            }
+
+            // fallback to default_ban_mask from config
             let mask = this.$state.setting('buffers.default_ban_mask');
             mask = mask.replace('%n', this.user.nick);
             mask = mask.replace('%i', this.user.username);

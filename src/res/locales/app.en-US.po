@@ -1,16 +1,19 @@
 msgid ""
 msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Crowdin-SourceKey: msgstr\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: crowdin.com\n"
 "X-Crowdin-Project: kiwiirc\n"
+"X-Crowdin-Project-ID: 275818\n"
 "X-Crowdin-Language: en\n"
 "X-Crowdin-File: /master/src/res/locales/app.dev.po\n"
+"X-Crowdin-File-ID: 11\n"
 "Project-Id-Version: kiwiirc\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Last-Translator: Darren Whitlen (kiwiirc)\n"
 "Language-Team: English\n"
 "Language: en_US\n"
-"PO-Revision-Date: 2019-06-27 14:41\n"
+"PO-Revision-Date: 2020-06-14 12:32\n"
 
 #: Start
 msgid "start_button"
@@ -48,9 +51,17 @@ msgstr "Kiwi Settings"
 msgid "channels"
 msgstr "Channels"
 
+#: Access
+msgid "access"
+msgstr "Access"
+
 #: Banned Users
 msgid "banned"
 msgstr "Banned Users"
+
+#: Invited Users
+msgid "invited"
+msgstr "Invited Users"
 
 #: Notifications
 msgid "notifications"
@@ -63,6 +74,10 @@ msgstr "Username"
 #: Password
 msgid "password"
 msgstr "Password"
+
+#: Server Password
+msgid "server_password"
+msgstr "Server Password"
 
 #: I have a password
 msgid "password_have"
@@ -159,6 +174,10 @@ msgstr "Ignore user"
 #: Channel
 msgid "connection_channel"
 msgstr "Channel"
+
+#: Away
+msgid "away"
+msgstr "Away"
 
 #: {{count}} week
 msgid "week"
@@ -276,6 +295,10 @@ msgstr "Colour nicknames in messages"
 msgid "settings_share_typing"
 msgstr "Share when I'm typing a message"
 
+#: Show inline image previews
+msgid "settings_show_inline_previews"
+msgstr "Show inline image previews"
+
 #: Include join/part messages as activity
 msgid "settings_show_joinpart"
 msgstr "Include join/part messages as activity"
@@ -388,6 +411,54 @@ msgstr "Refreshing banlist..."
 msgid "bans_nobody"
 msgstr "Nobody is banned!"
 
+#: Refresh invite list
+msgid "invites_refresh"
+msgstr "Refresh invite list"
+
+#: Invited user
+msgid "invites_user"
+msgstr "Invited user"
+
+#: Invited by
+msgid "invites_by"
+msgstr "Invited by"
+
+#: Refreshing invite list...
+msgid "invites_refreshing"
+msgstr "Refreshing invite list..."
+
+#: Nobody is invited!
+msgid "invites_nobody"
+msgstr "Nobody is invited!"
+
+#: This is a public channel.
+msgid "invite_public_channel"
+msgstr "This is a public channel."
+
+#: Only invited users can join.
+msgid "invite_private_channel"
+msgstr "Only invited users can join."
+
+#: Only allow invited users
+msgid "invite_set_private"
+msgstr "Only allow invited users"
+
+#: Allow anybody to join
+msgid "invite_set_public"
+msgstr "Allow anybody to join"
+
+#: Only registered users can join
+msgid "invite_registered_only"
+msgstr "Only registered users can join"
+
+#: Add invite
+msgid "invite_add_invite"
+msgstr "Add invite"
+
+#: (Any registered user)
+msgid "invite_any_registered"
+msgstr "(Any registered user)"
+
 #: Topic
 msgid "channel_topic"
 msgstr "Topic"
@@ -416,7 +487,7 @@ msgstr "Click the refresh button to update the channel list"
 msgid "channel_list_nonefound"
 msgstr "No channels found, try again later"
 
-#: Welcome to Kiwi IRC!
+#: Welcome to Kiwi IRC! Select a channel on the left.
 msgid "container_welcome"
 msgstr "Welcome to Kiwi IRC! Select a channel on the left."
 
@@ -556,6 +627,10 @@ msgstr "We couldn't connect to that server :("
 msgid "network_connect"
 msgstr "Connect To Network"
 
+#: Network Name
+msgid "network_name"
+msgstr "Network Name"
+
 #: Close options
 msgid "side_close"
 msgstr "Close options"
@@ -688,6 +763,14 @@ msgstr "Find More Channels"
 msgid "change_nick"
 msgstr "Change nick"
 
+#: Enter new nickname...
+msgid "enter_new_nick"
+msgstr "Enter new nickname..."
+
+#: This is you!
+msgid "user_you"
+msgstr "This is you!"
+
 #: Account name: {{user}}
 msgid "user_account"
 msgstr "Account name: {{user}}"
@@ -743,6 +826,18 @@ msgstr "Ban and kick from the channel"
 #: Please specify a channel to join. eg /join #example
 msgid "error_no_channel_join"
 msgstr "Please specify a channel to join. eg /join #example"
+
+#: The nickname {{nick}} is already in use!
+msgid "error_nick_in_use"
+msgstr "The nickname {{nick}} is already in use!"
+
+#: You must enter a new nickname
+msgid "error_empty_nick"
+msgstr "You must enter a new nickname"
+
+#: Nickname must not start with a number
+msgid "error_no_number"
+msgstr "Nickname must not start with a number"
 
 #: {{nick}} gives ops to {{target}}
 msgid "modes_give_ops"
@@ -857,7 +952,7 @@ msgid "command_quit"
 msgstr "Disconnect from the IRC server"
 
 #: Connect to a new IRC network
-msgid "command_connect"
+msgid "command_server"
 msgstr "Connect to a new IRC network"
 
 #: Request information on somebody
@@ -947,10 +1042,6 @@ msgstr "(Thanks to Adam @Rizon for the development websocket server support!)"
 #: Give the developer version of Kiwi IRC a try!
 msgid "rizon_dev"
 msgstr "Give the developer version of Kiwi IRC a try!"
-
-#: Connected
-msgid "connected"
-msgstr "Connected"
 
 #: Disconnected
 msgid "disconnected"

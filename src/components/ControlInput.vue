@@ -1,12 +1,16 @@
 <template>
-    <div :class="{'kiwi-controlinput-selfuser--open': selfuser_open}"
-         class="kiwi-controlinput kiwi-theme-bg"
+    <div
+        :class="{
+            'kiwi-controlinput-selfuser--open': selfuser_open,
+            'kiwi-controlinput--focus': has_focus,
+        }"
+        class="kiwi-controlinput kiwi-theme-bg"
     >
         <div class="kiwi-controlinput-selfuser">
             <transition name="kiwi-selfuser-trans">
                 <self-user
                     v-if="networkState==='connected'
-                    && selfuser_open === true"
+                        && selfuser_open === true"
                     :network="buffer.getNetwork()"
                     @close="selfuser_open=false"
                 />
@@ -52,18 +56,23 @@
                         @input="inputUpdate"
                         @keydown="inputKeyDown($event)"
                         @keyup="inputKeyUp($event)"
-                        @click="closeInputTool"/>
+                        @click="closeInputTool"
+                        @focus="has_focus = true"
+                        @blur="has_focus = false"
+                    />
                 </div>
                 <button
                     v-if="shouldShowSendButton"
                     type="submit"
-                    class="kiwi-controlinput-send fa fa-paper-plane" />
+                    class="kiwi-controlinput-send fa fa-paper-plane"
+                />
             </form>
 
             <div
                 v-if="shouldShowInputButtons"
                 ref="plugins"
-                class="kiwi-controlinput-tools">
+                class="kiwi-controlinput-tools"
+            >
                 <div
                     :class="{'kiwi-controlinput-tools-container-expand--inverse': !showPlugins}"
                     class="kiwi-controlinput-tools-container-expand"
@@ -76,25 +85,26 @@
                         <a
                             v-if="shouldShowColorPicker"
                             class="kiwi-controlinput-tool"
-                            @click.prevent="onToolClickTextStyle">
-                            <i class="fa fa-adjust" aria-hidden="true"/>
+                            @click.prevent="onToolClickTextStyle"
+                        >
+                            <i class="fa fa-adjust" aria-hidden="true" />
                         </a>
                         <a
                             v-if="shouldShowEmojiPicker"
                             class="kiwi-controlinput-tool"
                             @click.prevent="onToolClickEmoji"
                         >
-                            <i class="fa fa-smile-o" aria-hidden="true"/>
+                            <i class="fa fa-smile-o" aria-hidden="true" />
                         </a>
                         <div
+                            v-for="plugin in pluginUiElements"
+                            :key="plugin.id"
                             v-rawElement="{
                                 el: plugin.el,
                                 props: {
                                     controlinput: self,
                                 }
                             }"
-                            v-for="plugin in pluginUiElements"
-                            :key="plugin.id"
                             class="kiwi-controlinput-tool"
                         />
                     </div>
@@ -103,7 +113,7 @@
         </div>
 
         <div class="kiwi-controlinput-active-tool">
-            <component :is="active_tool" v-bind="active_tool_props"/>
+            <component :is="active_tool" v-bind="active_tool_props" />
         </div>
     </div>
 </template>
@@ -113,8 +123,8 @@
 
 import _ from 'lodash';
 import * as TextFormatting from '@/helpers/TextFormatting';
+import * as settingTools from '@/libs/settingTools';
 import autocompleteCommands from '@/res/autocompleteCommands';
-import state from '@/libs/state';
 import GlobalApi from '@/libs/GlobalApi';
 import AutoComplete from './AutoComplete';
 import ToolTextStyle from './inputtools/TextStyle';
@@ -135,8 +145,6 @@ export default {
         return {
             self: this,
             selfuser_open: false,
-            history: [],
-            history_pos: 0,
             autocomplete_open: false,
             autocomplete_items: [],
             autocomplete_filter: '',
@@ -152,17 +160,18 @@ export default {
             pluginUiElements: GlobalApi.singleton().controlInputPlugins,
             showPlugins: true,
             current_input_value: '',
+            has_focus: false,
         };
     },
     computed: {
         currentNick() {
-            let activeNetwork = state.getActiveNetwork();
+            let activeNetwork = this.$state.getActiveNetwork();
             return activeNetwork ?
                 activeNetwork.nick :
                 '';
         },
         networkState() {
-            let activeNetwork = state.getActiveNetwork();
+            let activeNetwork = this.$state.getActiveNetwork();
             return activeNetwork ?
                 activeNetwork.state :
                 '';
@@ -186,6 +195,27 @@ export default {
             }
             return false;
         },
+        history() {
+            if (this.$state.setting('buffers.shared_input')) {
+                return this.$state.ui.input_history;
+            }
+            return this.buffer.input_history;
+        },
+        history_pos: {
+            get() {
+                if (this.$state.setting('buffers.shared_input')) {
+                    return this.$state.ui.input_history_pos;
+                }
+                return this.buffer.input_history_pos;
+            },
+            set(newVal) {
+                if (this.$state.setting('buffers.shared_input')) {
+                    this.$state.ui.input_history_pos = newVal;
+                } else {
+                    this.buffer.input_history_pos = newVal;
+                }
+            },
+        },
     },
     watch: {
         history_pos(newVal) {
@@ -193,7 +223,7 @@ export default {
             this.$refs.input.setValue(val || '');
         },
         buffer() {
-            if (!state.setting('buffers.shared_input')) {
+            if (!this.$state.setting('buffers.shared_input')) {
                 this.inputRestore();
             }
 
@@ -204,7 +234,7 @@ export default {
         this.typingTimer = null;
         this.lastTypingTime = 0;
 
-        this.listen(state, 'document.keydown', (ev) => {
+        this.listen(this.$state, 'document.keydown', (ev) => {
             // No input box currently? Nothing to shift focus to
             if (!this.$refs.input) {
                 return;
@@ -273,8 +303,8 @@ export default {
         inputUpdate(val) {
             this.current_input_value = val;
 
-            if (state.setting('buffers.shared_input')) {
-                state.ui.current_input = val;
+            if (this.$state.setting('buffers.shared_input')) {
+                this.$state.ui.current_input = val;
             } else {
                 this.buffer.current_input = val;
             }
@@ -282,8 +312,8 @@ export default {
             this.maybeHidePlugins();
         },
         inputRestore() {
-            let currentInput = state.setting('buffers.shared_input') ?
-                state.ui.current_input :
+            let currentInput = this.$state.setting('buffers.shared_input') ?
+                this.$state.ui.current_input :
                 this.buffer.current_input;
 
             this.$refs.input.reset(currentInput);
@@ -362,18 +392,26 @@ export default {
                 this.$refs.autocomplete.selectCurrentItem();
             }
 
-            if (event.keyCode === 13) {
+            if (event.keyCode === 13 && (
+                (event.altKey && !event.shiftKey && !event.metaKey && !event.ctrlKey) ||
+                (event.shiftKey && !event.altKey && !event.metaKey && !event.ctrlKey)
+            )) {
+                // Add new line when shift+enter or alt+enter is pressed
+                event.preventDefault();
+                this.$refs.input.insertText('\n');
+            } else if (event.keyCode === 13) {
+                // Send message when enter is pressed
                 event.preventDefault();
                 this.submitForm();
             } else if (event.keyCode === 32) {
                 // Hitting space after just typing an ascii emoji will get it replaced with
                 // its image
-                if (state.setting('buffers.show_emoticons')) {
+                if (this.$state.setting('buffers.show_emoticons')) {
                     let currentWord = this.$refs.input.getCurrentWord();
-                    let emojiList = state.setting('emojis');
+                    let emojiList = this.$state.setting('emojis');
                     if (emojiList.hasOwnProperty(currentWord.word)) {
                         let emoji = emojiList[currentWord.word];
-                        let url = state.setting('emojiLocation') + emoji + '.png';
+                        let url = this.$state.setting('emojiLocation') + emoji + '.png';
                         this.$refs.input.setCurrentWord('');
                         this.$refs.input.addImg(currentWord.word + ' ', url);
                     }
@@ -403,11 +441,18 @@ export default {
                 // Tab key was just pressed, start general auto completion
                 let currentWord = this.$refs.input.getCurrentWord();
                 let currentToken = currentWord.word.substr(0, currentWord.position);
+                let inputText = this.$refs.input.getRawText();
 
-                let items = this.buildAutoCompleteItems({
-                    users: true,
-                    buffers: true,
-                });
+                let items = [];
+                if (inputText.indexOf('/set') === 0) {
+                    items = this.buildAutoCompleteItems({ settings: true });
+                } else {
+                    items = this.buildAutoCompleteItems({
+                        users: true,
+                        buffers: true,
+                    });
+                }
+
                 this.openAutoComplete(items);
                 this.autocomplete_filter = currentToken;
 
@@ -489,7 +534,7 @@ export default {
             }
 
             let ircText = this.$refs.input.buildIrcText();
-            state.$emit('input.raw', ircText);
+            this.$state.$emit('input.raw', ircText);
 
             // Add to history, keeping the history trimmed to the last 50 entries
             this.history.push(rawInput);
@@ -513,7 +558,7 @@ export default {
             }
         },
         openAutoComplete(items) {
-            if (state.setting('showAutocomplete')) {
+            if (this.$state.setting('showAutocomplete')) {
                 this.autocomplete_items = items;
                 this.autocomplete_open = true;
             }
@@ -559,7 +604,7 @@ export default {
                 let commandList = [];
                 autocompleteCommands.forEach((command) => {
                     // allow descriptions to be translation keys or static strings
-                    let desc = command.description.startsWith('locale_id_') ?
+                    let desc = command.description.indexOf('locale_id_') === 0 ?
                         TextFormatting.t(command.description.substr(10)) :
                         command.description;
                     commandList.push({
@@ -567,27 +612,41 @@ export default {
                         description: desc,
                         type: 'command',
                         // Each alias needs the / command prefix adding
-                        alias: (command.alias || []).map(c => '/' + c),
+                        alias: (command.alias || []).map((c) => '/' + c),
                     });
                 });
 
                 list = list.concat(commandList);
             }
 
+            if (opts.settings) {
+                let out = {};
+                let base = [];
+                settingTools.buildTree(out, base, this.$state.getSetting('settings'), false);
+                settingTools.buildTree(out, base, this.$state.getSetting('user_settings'), true);
+
+                let settingList = [];
+                Object.keys(out).forEach((setting) => {
+                    settingList.push({
+                        text: setting,
+                        type: 'setting',
+                    });
+                });
+
+                list = list.concat(settingList);
+            }
+
             return list;
         },
         startTyping() {
-            if (!this.buffer.getNetwork().ircClient.network.cap.isEnabled('message-tags')) {
+            let network = this.buffer.getNetwork();
+            if (!network.ircClient.network.cap.isEnabled('message-tags')) {
                 return;
             }
-            if (!this.buffer.setting('share_typing')) {
+            if (!this.buffer || !this.buffer.shouldShareTyping()) {
                 return;
             }
-            let buffer = this.buffer;
-            let network = buffer.getNetwork();
-            if (!buffer || (!buffer.isChannel() && !buffer.isQuery())) {
-                return;
-            }
+
             if (this.typingTimer) {
                 clearTimeout(this.typingTimer);
                 this.typingTimer = null;
@@ -598,21 +657,16 @@ export default {
                 return;
             }
 
-            network.ircClient.typing.start(buffer.name);
+            network.ircClient.typing.start(this.buffer.name);
 
             this.lastTypingTime = Date.now();
         },
         stopTyping(sendStopPause) {
-            if (!this.buffer.getNetwork().ircClient.network.cap.isEnabled('message-tags')) {
+            let network = this.buffer.getNetwork();
+            if (!network.ircClient.network.cap.isEnabled('message-tags')) {
                 return;
             }
-            if (!this.buffer.setting('share_typing')) {
-                return;
-            }
-            let buffer = this.buffer;
-            let network = buffer.getNetwork();
-
-            if (!buffer || (!buffer.isChannel() && !buffer.isQuery())) {
+            if (!this.buffer || !this.buffer.shouldShareTyping()) {
                 return;
             }
 
@@ -628,8 +682,8 @@ export default {
             }
 
             this.$refs.input.getRawText().trim() ?
-                network.ircClient.typing.pause(buffer.name) :
-                network.ircClient.typing.stop(buffer.name);
+                network.ircClient.typing.pause(this.buffer.name) :
+                network.ircClient.typing.stop(this.buffer.name);
         },
     },
 };
@@ -673,7 +727,6 @@ export default {
     line-height: 40px;
     transition: width 0.2s;
     transition-delay: 0.1s;
-    border-right: 1px solid;
 }
 
 .kiwi-controlinput-selfuser--open .kiwi-controlinput-user {
@@ -728,7 +781,7 @@ export default {
     height: 100%;
     box-sizing: border-box;
     overflow: visible;
-    padding-top: 8px;
+    padding: 7px 0 12px 0;
 }
 
 .kiwi-controlinput-tool {

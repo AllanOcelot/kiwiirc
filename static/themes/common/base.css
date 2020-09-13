@@ -1,5 +1,4 @@
 /* ---- Welcome Screens ----- */
-.kiwi-welcome-simple-form,
 .kiwi-customserver-form {
     background-color: var(--brand-default-bg);
     border: 1px solid var(--brand-midtone);
@@ -52,33 +51,32 @@
     background: var(--brand-default-bg);
 }
 
-.u-input-text-label {
+.u-form label {
     color: var(--brand-default-fg);
 }
 
-.u-input-text--focus {
+.u-input-text input:focus {
     border-color: var(--brand-primary);
-}
-
-.u-input-text-underline {
-    border-color: var(--brand-darktone);
-}
-
-.u-input-text-underline-active {
-    background: var(--brand-primary);
 }
 
 .u-form .u-input,
 .u-form textarea {
-    border-bottom-color: var(--brand-primary);
-    outline-color: var(--brand-primary);
+    outline: none;
+    border-color: var(--brand-input-border);
+    color: var(--brand-input-fg);
+    background: var(--brand-input-bg);
+    transition: border-color 0.1s;
+}
+
+.u-form .u-input:focus,
+.u-form textarea:focus {
+    border-color: var(--brand-primary);
 }
 
 .u-form label input[type='text'],
 .u-form label input[type='password'],
 .u-form label input[type='email'],
-.u-form textarea,
-.kiwi-networksettings input[type='password'] {
+.u-form textarea {
     border-color: var(--brand-primary);
 }
 
@@ -92,7 +90,7 @@
 /* ---- Global : Checkbox input ---- */
 .u-form input[type='checkbox'],
 .u-form input[type='radio'] {
-    border-color: var(--brand-default-fg);
+    border-color: var(--brand-input-border);
     background-color: var(--brand-default-bg);
 }
 
@@ -133,8 +131,12 @@
     border-bottom-color: var(--comp-border);
 }
 
-.kiwi-header-name {
+.kiwi-header-name-container {
     color: var(--comp-header-name-fg);
+}
+
+.kiwi-header-name {
+    background-color: var(--comp-header-bg);
 }
 
 .kiwi-header-option a:hover,
@@ -183,11 +185,6 @@
     border-top-color: var(--comp-border);
 }
 
-.kiwi-controlinput .kiwi-controlinput-user,
-.kiwi-controlinput-inner .kiwi-controlinput-user {
-    border-right-color: var(--comp-border);
-}
-
 .kiwi-controlinput-send {
     background: #f1f1f1;
 }
@@ -204,14 +201,6 @@
 
 .kiwi-controlinput-selfuser.kiwi-controlinput-selfuser--open {
     border: 1px solid var(--brand-midtone);
-}
-
-.kiwi-selfuser-actions {
-    border-top: 1px solid var(--brand-midtone);
-}
-
-.kiwi-selfuser-actions form .u-input {
-    border-bottom-color: var(--brand-primary);
 }
 
 /* ---- Auto complete ( autoComplete ) ---- */
@@ -472,12 +461,6 @@
     background: var(--brand-primary);
 }
 
-/* When hovering over a channel, these options are displayed and coloured upon hover */
-.kiwi-statebrowser-channel-settings,
-.kiwi-statebrowser-channel-leave {
-    background-color: var(--brand-default-fg);
-}
-
 .kiwi-statebrowser-channel-settings:hover {
     background-color: var(--brand-primary);
 }
@@ -572,6 +555,7 @@
 
 .kiwi-statebrowser-channel-label {
     background: var(--brand-primary);
+    color: var(--brand-default-bg);
 }
 .kiwi-statebrowser-channel-label--highlight {
     background: var(--brand-error);
@@ -802,7 +786,9 @@
 }
 
 .kiwi-messagelist-seperator {
-    border-top: 1px solid var(--brand-shadow);
+    color: var(--brand-darktone);
+    background: var(--brand-default-bg);
+    font-size: 0.9em;
 }
 
 .kiwi-messagelist-seperator > span {
@@ -820,12 +806,11 @@
 
 .kiwi-messagelist-message--highlight {
     background-color: var(--brand-midtone);
-    border-color: var(--brand-primary);
 }
 
 /* Notice Message styling */
 .kiwi-messagelist-message-notice {
-    border-left-color: #ffb314;
+    background: #EFD1A4;
 }
 
 /* Standard username and usertime styling */
@@ -836,19 +821,18 @@
 /* Unread user messages */
 .kiwi-messagelist-message.kiwi-messagelist-message--unread {
     border-left: 5px solid var(--brand-primary);
-    background: var(--brand-midtone);
 }
 
 /* When hovering over a users messages */
 .kiwi-messagelist-message--hover {
-    background-color: var(--brand-midtone);
+    border-left-color: var(--brand-primary);
 }
 
 /* Traditional message styling hover */
 .kiwi-messagelist-message--compact .kiwi-messagelist-message-privmsg:hover,
 .kiwi-messagelist-message--compact .kiwi-messagelist-message-action:hover,
-.kiwi-messagelist-message--compact .kiwi-messagelist-message-notice:hover, {
-    border-left-color: var(--brand-primary-hover);
+.kiwi-messagelist-message--compact .kiwi-messagelist-message-notice:hover {
+    background: var(--brand-primary-hover);
 }
 
 /* The shadow over the main text area that displays when the sidebar is open */
@@ -859,11 +843,6 @@
 /* Messagelayout inline */
 .kiwi-messagelist-message--text .kiwi-messagelist-time {
     color: var(--brand-default-fg);
-}
-
-/* Connection Styling */
-.kiwi-messagelist-message-connection {
-    background-color: var(--brand-default-bg);
 }
 
 /* ---- Traffic Messages ---- */
@@ -883,7 +862,7 @@
 }
 
 /* ---- Modern Layout Styling ---- */
-.kiwi-messagelist-avatar {
+.kiwi-avatar > span {
     color: var(--brand-default-bg);
     border-color: var(--brand-primary);
 }
@@ -904,16 +883,10 @@
     border-top-color: var(--brand-midtone);
 }
 
-/* ---- Compact Layout Styling ---- */
-.kiwi-messagelist-message--compact .kiwi-messagelist-nick:hover {
-    background-color: var(--brand-midtone);
-}
-
 /* Errors */
 .kiwi-messagelist-message-error,
 .kiwi-messagelist-message.kiwi-messagelist-message-error.kiwi-messagelist-message--highlight {
     background: var(--brand-error);
-    border-left-color: var(--brand-error);
     color: var(--brand-default-bg);
 }
 
@@ -947,21 +920,11 @@
 }
 
 .kiwi-messagelist-message-whois {
-    border-left-color: var(--brand-midtone);
-}
-
-.kiwi-messagelist-message.kiwi-messagelist-message--hover,
-.kiwi-messagelist-message.kiwi-messagelist-message--highlight,
-.kiwi-messagelist-message.kiwi-messagelist-message-traffic--hover {
-    border-color: var(--brand-primary);
+    background: var(--brand-midtone);
 }
 
 .kiwi-messagelist-message-motd {
     color: var(--brand-default-fg);
-}
-
-.kiwi-messagelist-message--own {
-    background-color: #f7f7f7;
 }
 
 /* ---- MessageInfo ---- */
@@ -1060,10 +1023,6 @@
     color: var(--brand-default-bg);
 }
 
-.kiwi-network-name-hover-icon {
-    color: var(--brand-default-bg);
-}
-
 /* Global Close Icon */
 .kiwi-close-icon,
 .kiwi-close-icon:hover {
@@ -1082,4 +1041,9 @@
 /* Buffer Key */
 .kiwi-bufferkey-button {
     border-color: var(--brand-default-bg);
+}
+
+/* Selected text */
+:root {
+    --brand-selected: rgba(0, 0, 255, 0.3);
 }

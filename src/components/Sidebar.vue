@@ -5,7 +5,7 @@
     >
         <span v-if="!sidebarState.isOpen" class="kiwi-sidebar-options">
             <div class="kiwi-sidebar-close" @click="sidebarState.close()">
-                {{ $t('close') }}<i class="fa fa-times" aria-hidden="true"/>
+                {{ $t('close') }}<i class="fa fa-times" aria-hidden="true" />
             </div>
         </span>
 
@@ -29,7 +29,7 @@
                         <tabbed-tab :header="$t('settings')" :focus="true">
                             <h3>{{ $t('channel_settings') }}</h3>
                             <hr>
-                            <channel-info :buffer="buffer"/>
+                            <channel-info :buffer="buffer" />
 
                             <div class="kiwi-sidebar-settings">
                                 <h3>{{ $t('side_settings') }}</h3>
@@ -66,18 +66,37 @@
                                 </form>
                             </div>
                         </tabbed-tab>
-                        <tabbed-tab :header="$t('banned')">
-                            <channel-banlist :buffer="buffer"/>
+                        <tabbed-tab :header="$t('access')">
+                            <a
+                                :class="{
+                                    'kiwi-sidebar-accesstab--active': accessTab === 'banlist'
+                                }"
+                                class="u-link kiwi-sidebar-accesstab"
+                                @click="accessTab='banlist'"
+                            >
+                                {{ $t('banned') }}
+                            </a>
+                            <a
+                                :class="{
+                                    'kiwi-sidebar-accesstab--active': accessTab === 'invitelist'
+                                }"
+                                class="u-link kiwi-sidebar-accesstab"
+                                @click="accessTab='invitelist'"
+                            >
+                                {{ $t('invited') }}
+                            </a>
+                            <channel-banlist v-if="accessTab==='banlist'" :buffer="buffer" />
+                            <channel-invitelist v-if="accessTab==='invitelist'" :buffer="buffer" />
                         </tabbed-tab>
                         <tabbed-tab :header="$t('notifications')">
-                            <buffer-settings :buffer="buffer"/>
+                            <buffer-settings :buffer="buffer" />
                         </tabbed-tab>
                         <tabbed-tab
                             v-for="item in pluginUiElements"
                             :key="item.id"
                             :header="item.title"
                         >
-                            <div :is="item.component" v-bind="item.props"/>
+                            <div :is="item.component" v-bind="item.props" />
                         </tabbed-tab>
                     </tabbed-view>
                 </div>
@@ -109,11 +128,17 @@
                 />
             </template>
             <template v-else-if="buffer.isQuery()">
-                <!-- TODO:
-                invite to an open channel<br />
-                ignore this user<br />
-                something else
-                -->
+                <div
+                    v-if="section === 'user'"
+                    class="kiwi-sidebar-userbox"
+                    @click.stop=""
+                >
+                    <user-box
+                        :user="sidebarState.sidebarUser"
+                        :buffer="buffer"
+                        :network="network"
+                    />
+                </div>
             </template>
         </template>
         <template v-else>
@@ -132,6 +157,7 @@ import BufferSettings from './BufferSettings';
 import ChannelInfo from './ChannelInfo';
 import SidebarAboutBuffer from './SidebarAboutBuffer';
 import ChannelBanlist from './ChannelBanlist';
+import ChannelInvitelist from './ChannelInvitelist';
 import Nicklist from './Nicklist';
 
 export { SidebarState as State };
@@ -142,6 +168,7 @@ export default {
         SidebarAboutBuffer,
         ChannelInfo,
         ChannelBanlist,
+        ChannelInvitelist,
         Nicklist,
         UserBox,
     },
@@ -149,6 +176,7 @@ export default {
     data() {
         return {
             pluginUiElements: GlobalApi.singleton().sideBarPlugins,
+            accessTab: 'banlist',
         };
     },
     computed: {
@@ -157,7 +185,7 @@ export default {
                 return 'component';
             }
 
-            return this.sidebarState.section() || 'nicklist';
+            return this.sidebarState.section();
         },
         settingShowJoinParts: {
             get() {
@@ -286,6 +314,14 @@ export default {
 @keyframes nicklisttransition {
     from { height: 0; }
     to { height: 100%; }
+}
+
+.kiwi-sidebar-accesstab {
+    margin-right: 1em;
+}
+
+.kiwi-sidebar-accesstab--active {
+    font-weight: bold;
 }
 
 .kiwi-channelbanlist-empty {

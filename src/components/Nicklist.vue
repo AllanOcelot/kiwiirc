@@ -1,5 +1,11 @@
 <template>
-    <div :class="{'kiwi-nicklist--filtering': filter_visible }" class="kiwi-nicklist">
+    <div
+        :class="{
+            'kiwi-nicklist--filtering': filter_visible,
+            'kiwi-nicklist--avatars': shouldShowAvatars,
+        }"
+        class="kiwi-nicklist"
+    >
         <div class="kiwi-nicklist-usercount" @click="toggleUserFilter">
             <span>
                 {{
@@ -11,16 +17,16 @@
 
             <input
                 ref="user_filter"
-                :placeholder="$t('filter_users')"
                 v-model="user_filter"
+                :placeholder="$t('filter_users')"
                 @blur="onFilterBlur"
             >
-            <i class="fa fa-search"/>
+            <i class="fa fa-search" />
         </div>
 
         <DynamicScroller
             :items="sortedUsers"
-            :min-item-size="26"
+            :min-item-size="34"
             :key-field="'nick'"
             class="kiwi-nicklist-users"
         >
@@ -52,11 +58,22 @@ import NicklistUser from './NicklistUser';
 
 let log = Logger.namespace('Nicklist');
 
+// This provides a better sort for numbered nicks but does not work on ios9
+let intlCollator = null;
+if (global.Intl) {
+    intlCollator = new Intl.Collator({}, { numeric: true });
+}
+
 // Hot function, so it's here for easier caching
 function strCompare(a, b) {
+    if (intlCollator) {
+        return intlCollator.compare(a, b);
+    }
+
     if (a === b) {
         return 0;
     }
+
     return a > b ?
         1 :
         -1;
@@ -76,6 +93,9 @@ export default {
         };
     },
     computed: {
+        shouldShowAvatars() {
+            return this.buffer.setting('nicklist_avatars');
+        },
         sortedUsers() {
             // Get a list of network prefixes and give them a rank number
             let netPrefixes = this.network.ircClient.network.options.PREFIX;
@@ -126,6 +146,16 @@ export default {
                     modesA.length === 0 &&
                     modesB.length === 0
                 ) {
+                    // Compare away status
+                    if (this.$state.setting('nicklistGroupAway')) {
+                        if (a.away && !b.away) {
+                            return 1;
+                        }
+                        if (!a.away && b.away) {
+                            return -1;
+                        }
+                    }
+
                     return strCompare(nickMap[a.nick], nickMap[b.nick]);
                 }
 
@@ -145,12 +175,22 @@ export default {
                 }
 
                 // Both users have a prefix so find the highest ranking one
-                let aP = prefixOrders[modesA[0]];
-                let bP = prefixOrders[modesB[0]];
+                let aP = prefixOrders[this.buffer.userMode(a)];
+                let bP = prefixOrders[this.buffer.userMode(b)];
                 if (aP > bP) {
                     return 1;
                 } else if (aP < bP) {
                     return -1;
+                }
+
+                // Prefixes are the same, compare away status
+                if (this.$state.setting('nicklistGroupAway')) {
+                    if (a.away && !b.away) {
+                        return 1;
+                    }
+                    if (!a.away && b.away) {
+                        return -1;
+                    }
                 }
 
                 // Prefixes are the same, resort to comparing text
@@ -200,7 +240,7 @@ export default {
 <style lang="less">
 
 /* Adjust the sidebars width when this nicklist is in view */
-.kiwi-sidebar.kiwi-sidebar-section-nicklist {
+.kiwi-container .kiwi-sidebar.kiwi-sidebar-section-nicklist {
     max-width: 250px;
     width: 250px;
 }
@@ -275,12 +315,12 @@ export default {
     box-sizing: border-box;
     max-height: 100%;
     flex: 1 auto;
-    list-style: none;
     line-height: 1.2em;
+    margin-top: 6px;
 }
 
 @media screen and (max-width: 759px) {
-    .kiwi-sidebar.kiwi-sidebar-section-nicklist {
+    .kiwi-container .kiwi-sidebar.kiwi-sidebar-section-nicklist {
         width: 100%;
         max-width: 380px;
     }

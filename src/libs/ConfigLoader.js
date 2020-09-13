@@ -55,22 +55,40 @@ export default class ConfigLoader {
     }
 
     setConfig(confObj) {
-        this.config = Object.create(null);
-        _.each(confObj, (_val, key) => {
-            let val = _val;
-            if (typeof val === 'string') {
-                val = this.insertReplacements(val);
-            }
+        let walkObject = (obj, target) => {
+            _.each(obj, (_val, key) => {
+                let val = _val;
+                if (typeof val === 'string') {
+                    val = this.insertReplacements(val);
+                    target[key] = val;
+                } else if (typeof val === 'object') {
+                    target[key] = _.isArray(val) ?
+                        [] :
+                        {};
+                    walkObject(val, target[key]);
+                } else {
+                    target[key] = val;
+                }
+            });
+        };
 
-            this.config[key] = val;
-        });
+        this.config = Object.create(null);
+        walkObject(confObj, this.config);
     }
 
     insertReplacements(input) {
         let out = input;
-        Object.keys(this.valReplacements).forEach((k) => {
+        let keys = Object.keys(this.valReplacements);
+        for (let i = 0; i < keys.length; i++) {
+            let k = keys[i];
+            if (input === '{{' + k + '}}') {
+                // If we have an exact match, return the exact replacement value we have as
+                // it may not be a string
+                return this.valReplacements[k];
+            }
+
             out = out.replace('{{' + k + '}}', this.valReplacements[k]);
-        });
+        }
         return out;
     }
 }

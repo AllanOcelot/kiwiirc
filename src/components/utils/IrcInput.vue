@@ -15,6 +15,7 @@
             @click="$emit('click', $event)"
             @paste="onPaste"
             @focus="onFocus()"
+            @blur="$emit('blur', $event)"
         />
     </div>
 </template>
@@ -23,7 +24,7 @@
 'kiwi public';
 
 import _ from 'lodash';
-import htmlparser from 'htmlparser2';
+import * as htmlparser from 'htmlparser2';
 import * as Colours from '@/helpers/Colours';
 
 let Vue = require('vue');
@@ -61,24 +62,37 @@ export default Vue.component('irc-input', {
         },
         onPaste(event) {
             event.preventDefault();
-
-            let clpData = (event.clipboardData || window.clipboardData);
-            let ignoreThisPaste = false;
-
-            clpData.types.forEach((type) => {
-                let ignoreTypes = ['Files', 'image'];
-                ignoreTypes.forEach((ig) => {
-                    if (type.indexOf(ig) > -1) {
-                        ignoreThisPaste = true;
-                    }
+            if (typeof event.clipboardData !== 'undefined') {
+                let ignoreThisPaste = false;
+                let clpData = event.clipboardData;
+                clpData.types.forEach((type) => {
+                    let ignoreTypes = ['Files', 'image'];
+                    ignoreTypes.forEach((ig) => {
+                        if (type.indexOf(ig) > -1) {
+                            ignoreThisPaste = true;
+                        }
+                    });
                 });
-            });
 
-            if (ignoreThisPaste) {
-                return;
+                if (ignoreThisPaste) {
+                    return;
+                }
+
+                document.execCommand('insertText', false, clpData.getData('text/plain'));
+            } else {
+                // IE11
+                let clpText = window.clipboardData.getData('Text');
+                if (!clpText) {
+                    return;
+                }
+
+                let selection = window.getSelection();
+                let range = selection.getRangeAt(0);
+                if (range) {
+                    range.deleteContents();
+                    range.insertNode(document.createTextNode(clpText));
+                }
             }
-
-            document.execCommand('insertText', false, clpData.getData('text/plain'));
 
             setTimeout(() => {
                 this.updateValueProps();
@@ -90,6 +104,8 @@ export default Vue.component('irc-input', {
             if (!this.getRawText() && this.default_colour) {
                 this.setColour(this.default_colour.code, this.default_colour.colour);
             }
+
+            this.$emit('focus', event);
         },
         updateValueProps() {
             let selection = window.getSelection();
@@ -113,8 +129,6 @@ export default Vue.component('irc-input', {
             } else {
                 this.current_el_pos = 0;
             }
-
-            this.focus();
         },
         setValue(newVal) {
             this.value = newVal;
@@ -208,6 +222,13 @@ export default Vue.component('irc-input', {
                     } else if (name === 'u') {
                         textValue += '\x1f';
                         addToggle('\x1f');
+                    } else if (name === 'div' || name === 'br') {
+                        // divs and breaks are both considered newlines. For each line we need to
+                        // close all current toggles and then reopen them for the next so that the
+                        // styles continue .
+                        textValue += getToggles();
+                        textValue += '\n';
+                        textValue += getToggles();
                     }
 
                     if (attribs.src && this.code_map[attribs.src]) {
@@ -427,9 +448,11 @@ export default Vue.component('irc-input', {
 }
 
 .kiwi-ircinput-editor {
-    white-space: pre;
     overflow-x: hidden;
     outline: none;
+
+    /* When the contenteditable div is empty firefox makes its height 0px */
+    height: 100%;
 }
 
 .kiwi-ircinput-editor:empty:not(:focus)::before {
@@ -439,6 +462,7 @@ export default Vue.component('irc-input', {
 
 .kiwi-ircinput-editor img {
     height: 1em;
+    vertical-align: -0.1em;
 }
 
 </style>

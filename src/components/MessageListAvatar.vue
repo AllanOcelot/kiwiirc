@@ -1,45 +1,20 @@
-<template>
-    <div
-        :style="{
-            'background-color': colour
-        }"
-        :data-nick="message.nick"
-        class="kiwi-messagelist-avatar"
-    >
-        {{ message.nick[0] }}
-    </div>
+<template functional>
+    <component :is="$options.c.Avatar" :user="props.user" :message="props.message" size="small" />
 </template>
 
 <script>
 
 'kiwi public';
 
+import Avatar from './Avatar';
+
+// This component simply wraps the Avatar component so that plugins may override this messagelist
+// avatar separately than the nicklist avatar
 export default {
-    props: ['message'],
-    computed: {
-        colour() {
-            return this.message.user ?
-                this.message.user.getColour() :
-                '';
-        },
+    c: {
+        Avatar,
     },
+    props: ['message', 'user'],
 };
 
 </script>
-
-<style>
-
-.kiwi-messagelist-avatar {
-    text-transform: uppercase;
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 40px;
-    font-weight: 600;
-    margin-top: 3px;
-    border: 2px solid;
-}
-
-</style>

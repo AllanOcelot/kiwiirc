@@ -4,6 +4,7 @@
 
 import EventEmitter from 'eventemitter3';
 import Vue from 'vue';
+import JSON5 from 'json5';
 import _ from 'lodash';
 import compareVersions from 'compare-versions';
 import * as Misc from '@/helpers/Misc';
@@ -18,10 +19,13 @@ export default class GlobalApi extends EventEmitter {
     constructor() {
         super();
 
-        this.version = '1.3.0';
+        // eslint-disable-next-line no-undef
+        this.version = __VERSION__;
 
         /** A reference to the internal Vuejs instance */
         this.Vue = Vue;
+        /** Expose JSON5 so that plugins can use the same config format */
+        this.JSON5 = JSON5;
         /** The applications internal state */
         this.state = null;
         /** The applications ThemeManager */
@@ -73,7 +77,7 @@ export default class GlobalApi extends EventEmitter {
 
     // Init any plugins that were added before we were ready
     initPlugins() {
-        pluginsToInit.forEach(plugin => this.initPlugin(plugin));
+        pluginsToInit.forEach((plugin) => this.initPlugin(plugin));
         pluginsToInit = [];
     }
 
@@ -93,9 +97,14 @@ export default class GlobalApi extends EventEmitter {
      * E.g. require('helpers/TextFormatting');
      * @param {String} mod The module path
      */
-    require(mod) {
-        let path = mod.replace(/\//g, '.');
-        return _.get(this.exports, path);
+    require(modPath) {
+        let path = modPath.replace(/\//g, '.');
+        let mod = _.get(this.exports, path);
+        if (typeof mod === 'undefined') {
+            Logger.error('Module does not exist: ' + modPath);
+        }
+
+        return mod;
     }
 
     setState(state) {
@@ -134,6 +143,10 @@ export default class GlobalApi extends EventEmitter {
      */
     logLevel(newLevel) {
         Logger.setLevel(newLevel);
+    }
+
+    get log() {
+        return Logger;
     }
 
     /**

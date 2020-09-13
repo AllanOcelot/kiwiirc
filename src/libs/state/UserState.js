@@ -17,6 +17,8 @@ export default class UserState {
         this.buffers = Object.create(null);
         this.hasWhois = false;
         this.typingState = Object.create(null);
+        this.avatar = user.avatar || { small: '', large: '' };
+        this.ignore = false;
 
         Vue.observable(this);
 
@@ -43,19 +45,21 @@ export default class UserState {
         // default will use the themes default text colour
         return this.colour === 'default' ? '' : this.colour;
     }
+
     isAway() {
         return !!this.away;
     }
 
-    typingStatus(target, status) {
-        if (!this.typingState[target.toLowerCase()]) {
-            Vue.set(this.typingState, target.toLowerCase(), { started: 0, status: '' });
+    typingStatus(_target, status) {
+        let target = _target.toLowerCase();
+        if (!status) {
+            return this.typingState[target] || { status: '' };
         }
 
-        let typing = this.typingState[target.toLowerCase()];
-
-        if (!status) {
-            return this.typingState[target.toLowerCase()] || { status: '' };
+        let typing = this.typingState[target];
+        if (!typing) {
+            Vue.set(this.typingState, target, { started: 0, status: '' });
+            typing = this.typingState[target];
         }
 
         if (typing.timeout) {
@@ -64,7 +68,7 @@ export default class UserState {
         }
 
         if (status === 'done') {
-            Vue.delete(this.typingState, target.toLowerCase());
+            Vue.delete(this.typingState, target);
             return null;
         }
 

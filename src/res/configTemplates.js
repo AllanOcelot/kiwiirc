@@ -43,6 +43,7 @@ export const configTemplates = {
             password: '',
         },
         warnOnExit: true,
+        quitMessage: 'Page closed',
         // Default buffer settings
         buffers: {
             messageLayout: 'modern',
@@ -67,12 +68,17 @@ export const configTemplates = {
             hide_message_counts: false,
             show_realnames: false,
             default_ban_mask: '*!%i@%h',
-            default_kick_reason: 'Your behavior is not conducive to the desired environment.',
+            default_kick_reason: 'Your behaviour is not conducive to the desired environment.',
             shared_input: false,
             show_message_info: true,
             who_loop: true,
             share_typing: true,
-            flash_title: true,
+            // flash_title: message/highlight/off
+            flash_title: 'message',
+            nicklist_avatars: false,
+            show_link_previews: true,
+            inline_link_auto_previews: true,
+            inline_link_auto_preview_whitelist: '.*',
         },
         // Startup screen default
         startupOptions: {
@@ -83,11 +89,14 @@ export const configTemplates = {
             nick: 'kiwi_?',
             direct: false,
             state_key: 'kiwi-state',
+            remember_buffers: true,
             nick_format: '',
         },
+        autoReconnect: false,
         disconnectOnSaslFail: true,
         allowRegisterProtocolHandler: false,
         noticeActiveBuffer: true,
+        nicklistGroupAway: false,
         showChanlistModes: false,
         showAutocomplete: true,
         showEmojiPicker: true,
@@ -108,6 +117,7 @@ export const configTemplates = {
 /w /whois $1+
 /raw /quote $1+
 /connect /server $1+
+/disconnect /quit $1+
 /cycle $channel? /lines /part $channel | /join $channel
 /active /back $1+
 /umode /mode $nick $1+
@@ -330,6 +340,7 @@ export const configTemplates = {
             show_emoticons: false,
             show_message_info: false,
             share_typing: false,
+            inline_link_auto_previews: false,
         },
     },
 
