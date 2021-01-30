@@ -122,7 +122,12 @@ function createNewState() {
                                 key: buffer.key,
                                 enabled: !!buffer.enabled,
                                 settings: _.cloneDeep(buffer.settings),
+                                latest_messages: [],
                             };
+
+                            buffer.latest_messages.forEach((msg) => {
+                                bufferObj.latest_messages.push(msg.serialise());
+                            });
 
                             return bufferObj;
                         });
@@ -176,6 +181,11 @@ function createNewState() {
                             buffer.key = impBuffer.key;
                             buffer.enabled = !!impBuffer.enabled;
                             buffer.settings = impBuffer.settings;
+
+                            let latestMessages = impBuffer.latest_messages || [];
+                            latestMessages.forEach((msg) => {
+                                buffer.latest_messages.push(new Message(msg));
+                            });
 
                             network.buffers.push(buffer);
                         });
@@ -356,7 +366,7 @@ function createNewState() {
                     this.ui.active_network = 0;
                     this.ui.active_buffer = '';
                 } else {
-                    if (this.ui.active_network) {
+                    if (this.settings.useBufferHistory && this.ui.active_network) {
                         // Keep track of last 20 viewed buffers. When closing buffers we can go back
                         // to one of the previous ones
                         this.ui.last_active_buffers.push({
@@ -385,6 +395,12 @@ function createNewState() {
             },
 
             openLastActiveBuffer: function openLastActiveBuffer() {
+                // if not using buffer history, just unset the active buffer
+                if (!this.settings.useBufferHistory) {
+                    this.setActiveBuffer();
+                    return;
+                }
+
                 let targetNetwork;
                 let targetBuffer;
                 let lastActive = this.ui.last_active_buffers;

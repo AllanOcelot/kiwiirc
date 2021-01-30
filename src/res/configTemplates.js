@@ -58,6 +58,7 @@ export const configTemplates = {
             show_topics: true,
             show_nick_changes: true,
             show_mode_changes: true,
+            show_presence_changes: true,
             traffic_as_activity: false,
             coloured_nicklist: true,
             colour_nicknames_in_messages: true,
@@ -105,6 +106,7 @@ export const configTemplates = {
         showAwayStatusIndicators: true,
         sidebarDefault: 'nicklist',
         showRaw: false,
+        useBufferHistory: true,
         hideSettings: null,
         highlights: '',
         teamHighlights: false,
@@ -121,6 +123,11 @@ export const configTemplates = {
 /cycle $channel? /lines /part $channel | /join $channel
 /active /back $1+
 /umode /mode $nick $1+
+/cs /msg chanserv $1+
+/ns /msg nickserv $1+
+/bs /msg botserv $1+
+/hs /msg hostserv $1+
+/os /msg operserv $1+
 
 # Op related aliases
 /op /quote mode $channel +o $1+
@@ -307,7 +314,7 @@ export const configTemplates = {
             ctcp_response: '[CTCP %nick reply] %message',
             ctcp_request: '[CTCP %nick] %message',
             privmsg: '%text',
-            notice: '%text',
+            notice: '[NOTICE] %text',
             action: '* %nick %text',
             whois_ident: '%nick [%nick!%ident@%host] * %text',
             whois_error: '[%nick] %text',
