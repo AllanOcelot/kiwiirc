@@ -58,7 +58,7 @@ export default {
                         this.$el.style.maxHeight = (this.settings.maxHeight || 400) + 'px';
                     } else {
                         // This is main media view set a relative max height
-                        this.$emit('setMaxHeight', '40%');
+                        this.$emit('setMaxHeight', '54%');
                     }
                 });
             };
@@ -67,7 +67,9 @@ export default {
                 let head = document.getElementsByTagName('head')[0];
                 let script = document.createElement('script');
                 script.type = 'text/javascript';
-                script.src = '//cdn.embedly.com/widgets/platform.js';
+                let embedlyUrl = this.$state.getSetting('settings.embedly.script') ||
+                    '//cdn.embedly.com/widgets/platform.js';
+                script.src = embedlyUrl;
                 head.appendChild(script);
                 embedlyTagIncluded = true;
             }
@@ -82,7 +84,7 @@ export default {
 
     .embedly-card {
         display: block;
-        margin: 10px 0;
+        margin: 4px 0;
     }
 
     .embedly-card-hug {
